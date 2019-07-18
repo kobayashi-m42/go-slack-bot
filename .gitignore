@@ -13,3 +13,6 @@
 
 .idea
 go-slack-bot.iml
+
+.env
+.envrc
