@@ -1,0 +1,11 @@
+version: '3.5'
+
+services:
+  go-slack-bot:
+    build:
+      context: .
+      target: build
+    env_file: .env
+    volumes:
+      - ./:/go/app
+    command: go run main.go
