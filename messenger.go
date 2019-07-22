@@ -14,16 +14,18 @@ type Messenger interface {
 
 type slackMessenger struct {
 	rtm *slack.RTM
-	bot Bot
+	Bot
+	GitHubAPI
 }
 
-func NewMessenger(token string, bot *Bot) Messenger {
+func NewMessenger(token string, bot *Bot, githubAPI *GitHubAPI) Messenger {
 	api := slack.New(token)
 	rtm := api.NewRTM()
 
 	return &slackMessenger{
-		rtm: rtm,
-		bot: *bot,
+		rtm:       rtm,
+		Bot:       *bot,
+		GitHubAPI: *githubAPI,
 	}
 }
 
@@ -33,12 +35,20 @@ func (m *slackMessenger) Listen() {
 	for msg := range m.rtm.IncomingEvents {
 		switch ev := msg.Data.(type) {
 		case *slack.MessageEvent:
-			if err := m.bot.ValidateMessageEvent(ev); err != nil {
+			if err := m.ValidateMessageEvent(ev); err != nil {
 				log.Printf("[ERROR] Failed to handle responseMessage: %s", err)
 				break
 			}
-			text, channelID := m.bot.createResponseMessage(ev)
-			m.sndMessage(text, channelID)
+
+			title := m.GetTitleFromText(ev.Msg.Text)
+			issue, err := m.CreateIssueByNumber(title)
+			if err != nil {
+				log.Printf("[ERROR] Failed to create Issue: %s", err)
+				break
+			}
+
+			text := issue.GetHTMLURL()
+			m.sndMessage(text, m.channelID)
 
 		case *slack.RTMError:
 			fmt.Printf("[ERROR]: %s", ev.Error())

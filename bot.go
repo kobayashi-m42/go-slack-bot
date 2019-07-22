@@ -39,10 +39,13 @@ func (b *Bot) ValidateMessageEvent(ev *slack.MessageEvent) error {
 	return nil
 }
 
-// メッセージの作成
-func (b *Bot) createResponseMessage(ev *slack.MessageEvent) (string, string) {
-	if strings.Contains(ev.Msg.Text, "ねこ") {
-		return "cat!! (=^x^=)！！", b.channelID
-	}
-	return "message from bot", b.channelID
+func (b *Bot) GetTitleFromText(text string) string {
+	removedBotID := strings.ReplaceAll(text, b.botID, "")
+	message := b.sanitizeMsg(removedBotID)
+	return message
+}
+
+func (b *Bot) sanitizeMsg(msg string) string {
+	msg = strings.TrimSpace(msg)
+	return msg
 }
