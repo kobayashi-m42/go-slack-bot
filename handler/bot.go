@@ -1,9 +1,8 @@
 package handler
 
 import (
-	"fmt"
-
 	"github.com/kobayashi-m42/go-slack-bot/domain/service"
+	"github.com/kobayashi-m42/go-slack-bot/infrastructure/log"
 
 	"github.com/nlopes/slack"
 )
@@ -16,6 +15,7 @@ type slackBot struct {
 	botID        string
 	channelID    string
 	rtm          *slack.RTM
+	log          log.Logger
 	messageEvent chan *slack.MessageEvent
 	Services
 }
@@ -25,7 +25,7 @@ type Bot interface {
 	sndMessage(text string, channelID string)
 }
 
-func NewBot(token, botID, channelID string, services *Services) Bot {
+func NewBot(token, botID, channelID string, logger log.Logger, services *Services) Bot {
 	api := slack.New(token)
 	rtm := api.NewRTM()
 
@@ -33,6 +33,7 @@ func NewBot(token, botID, channelID string, services *Services) Bot {
 		botID:        "<@" + botID + ">",
 		channelID:    channelID,
 		rtm:          rtm,
+		log:          logger,
 		messageEvent: make(chan *slack.MessageEvent),
 		Services:     *services,
 	}
@@ -54,10 +55,10 @@ func (s *slackBot) Listen() {
 			s.messageEvent <- ev
 
 		case *slack.RTMError:
-			fmt.Printf("[ERROR]: %s", ev.Error())
+			s.log.Errorf(ev.Error())
 
 		case *slack.InvalidAuthEvent:
-			fmt.Printf("[ERROR]: %s", authenticationError)
+			s.log.Errorf(authenticationError)
 			break
 
 		case *slack.DisconnectedEvent:

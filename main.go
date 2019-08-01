@@ -7,6 +7,7 @@ import (
 	"github.com/kobayashi-m42/go-slack-bot/handler"
 	"github.com/kobayashi-m42/go-slack-bot/infrastructure"
 	"github.com/kobayashi-m42/go-slack-bot/infrastructure/api"
+	"github.com/kobayashi-m42/go-slack-bot/infrastructure/log"
 )
 
 func main() {
@@ -26,11 +27,15 @@ func main() {
 	// Initialize application service
 	service := application.NewGitHubService(repository)
 
+	// Initialize Logger
+	logger := log.NewLogger()
+
 	// Run Bot
 	botServer := handler.NewBot(
 		apiToken,
 		botID,
 		channelID,
+		logger,
 		&handler.Services{
 			GitHubRepositoryService: service,
 		})
