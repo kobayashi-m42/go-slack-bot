@@ -1,5 +1,6 @@
 # go-slack-bot
 
+## 概要
 Slackに投稿されたメッセージからGitHubの特定のリポジトリにIssueを作成するBotです。
 
 特定のチャンネルでBot宛てのメッセージを送信してください。
@@ -8,19 +9,46 @@ Slackに投稿されたメッセージからGitHubの特定のリポジトリに
 
 なお、リポジトリは固定で事前に環境変数に設定する必要があります。
 
-## Slack AppにBotsを追加する
+### ディレクトリ構成
+
+ドメイン駆動設計で実装するにあたって、レイヤードアーキテクチャを採用。
+
+```
+.
+├── application  ---------------------- アプリケーション層
+│     * シナリオクラスを作成
+│
+├── domain  --------------------------- ドメイン層
+│   │ * ビジネスルールや知識を表す層
+│   │
+│   ├── repository
+│   │     * repositoryのinterfaceを定義
+│   │
+│   └── service
+│         * application serviceのinterfaceを定義
+│
+│── handler  -------------------------- プレゼンテーション層
+│     * Slackからのメッセージを受信、送信することが責務
+│
+└── infrastructure  ------------------- インフラストラクチャ層
+      * APIへの操作
+      * ログの出力
+```
+
+## 事前準備
+### Slack AppにBotsを追加する
 下記のページより、Slack Appに Botsを追加してください。
 
 https://slack.com/apps/A0F7YS25R-bots
 
 追加すると、APIトークンが発行されます。
 
-## GitHub Tokenの発行
+### GitHub Tokenの発行
 下記のページを参考にGitHubのトークンを発行します。
 
 https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line
 
-## 環境変数の設定
+### 環境変数の設定
 `.env`を作成します。
 
 ```
@@ -32,19 +60,20 @@ GITHUB_OWNER=your_github_owner
 GITHUB_REPOSITORY=your_github_repository // Issueを作成するリポジトリ
 ```
 
-## Dockerでの実行
+## 実行方法
+### Dockerでの実行
 
-### 初回起動
+#### 初回起動
 ```
 docker-compose up --build -d
 ```
 
-### 2回目以降の起動
+#### 2回目以降の起動
 ```
 docker-compose up
 ```
 
-## 本番環境での実行
+### 本番環境での実行
 実行時に環境変数の設定ファイルを指定する必要があります。
 
 ```

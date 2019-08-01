@@ -3,7 +3,6 @@ package handler
 import (
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/kobayashi-m42/go-slack-bot/domain"
@@ -13,7 +12,10 @@ import (
 
 func (s *slackBot) handleMessage(ev *slack.MessageEvent) {
 	if err := s.validateMessageEvent(ev); err != nil {
-		log.Printf("[ERROR]: %s %s %s", err, ev.Channel, ev.Msg.Text)
+		s.log.Warnw(err.Error(),
+			"channel", ev.Channel,
+			"request", ev.Msg.Text,
+		)
 		return
 	}
 
